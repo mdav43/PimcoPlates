@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PIMCO Plates™ — Dinnerware That Diversifies</title>
+  <meta name="description" content="Premium restaurant plates and bowls from PIMCO. Finish your meal, face your finances. Is your money safe? Are you retirement ready?" />
+  <style>
+    :root {
+      --navy: #0a2540;
+      --gold: #c8a14a;
+      --cream: #f7f3ea;
+      --ink: #11253b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.6;
+      text-align: center;
+    }
+    .bar {
+      background: var(--navy);
+      color: var(--cream);
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.6rem 1rem;
+    }
+    header {
+      padding: 4rem 1.5rem 2rem;
+    }
+    .logo {
+      font-size: 2.6rem;
+      letter-spacing: 0.35em;
+      color: var(--navy);
+      font-weight: bold;
+    }
+    .logo span { color: var(--gold); }
+    .tag {
+      margin-top: 0.5rem;
+      font-style: italic;
+      color: #5b6b7a;
+      letter-spacing: 0.05em;
+    }
+    .hero {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem 3rem;
+    }
+    .hero h1 {
+      font-size: 2rem;
+      color: var(--navy);
+      margin-bottom: 1rem;
+    }
+    .hero p { font-size: 1.15rem; color: #3a4a59; }
+
+    /* The plate */
+    .plate-stage { padding: 1rem 1.5rem 3rem; }
+    .plate {
+      width: 320px;
+      height: 320px;
+      max-width: 80vw;
+      max-height: 80vw;
+      margin: 0 auto;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 45%, #ffffff 0%, #f3ede0 60%, #e7ddc8 100%);
+      box-shadow:
+        0 0 0 14px #ffffff,
+        0 0 0 16px var(--gold),
+        0 22px 45px rgba(10, 37, 64, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .plate::before {
+      content: "";
+      position: absolute;
+      inset: 22%;
+      border-radius: 50%;
+      border: 2px solid rgba(200, 161, 74, 0.55);
+    }
+    .quote {
+      font-style: italic;
+      font-size: 1.35rem;
+      color: var(--navy);
+      max-width: 60%;
+      transition: opacity 0.5s ease;
+    }
+    .plate-note {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: #7a8794;
+      letter-spacing: 0.06em;
+    }
+
+    .products {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 3.5rem 1.5rem;
+    }
+    .products h2 {
+      font-size: 1.8rem;
+      margin-bottom: 2rem;
+      letter-spacing: 0.05em;
+    }
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(200, 161, 74, 0.35);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      width: 250px;
+    }
+    .card .icon { font-size: 2.4rem; }
+    .card h3 { color: var(--gold); margin: 0.75rem 0 0.4rem; letter-spacing: 0.04em; }
+    .card p { font-size: 0.95rem; color: #cbd5e0; }
+
+    .cta {
+      padding: 3.5rem 1.5rem 4rem;
+    }
+    .cta h2 { font-size: 1.7rem; color: var(--navy); margin-bottom: 0.5rem; }
+    .cta p { color: #5b6b7a; margin-bottom: 1.5rem; }
+    .btn {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--navy);
+      text-decoration: none;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.9rem 2rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      box-shadow: 0 8px 20px rgba(200, 161, 74, 0.4);
+    }
+    .btn:hover { background: #d8b25c; }
+
+    footer {
+      background: #061a30;
+      color: #8a98a6;
+      font-size: 0.72rem;
+      line-height: 1.7;
+      padding: 2.5rem 1.5rem;
+    }
+    footer .disclaimer { max-width: 640px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <div class="bar">Total Return on Tableware</div>
+
+  <header>
+    <div class="logo">PIMCO<span>&nbsp;PLATES</span></div>
+    <div class="tag">A Bonds Firm Side Hustle&trade;</div>
+  </header>
+
+  <section class="hero">
+    <h1>Finish your meal. Face your finances.</h1>
+    <p>Premium restaurant dinnerware engraved with the questions you've been avoiding. Because dessert shouldn't be the only thing weighing on you.</p>
+  </section>
+
+  <section class="plate-stage">
+    <div class="plate">
+      <div class="quote" id="quote">Is your money safe?</div>
+    </div>
+    <p class="plate-note">Revealed only once the plate is clean. No clean plate, no clarity.</p>
+  </section>
+
+  <section class="products">
+    <h2>The Fixed-Income Collection</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="icon">🍽️</div>
+        <h3>The Dinner Plate</h3>
+        <p>"Are you retirement ready?" Served under the chicken parm.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🥣</div>
+        <h3>The Soup Bowl</h3>
+        <p>"Diversified, or just hungry?" Visible by the last spoonful.</p>
+      </div>
+      <div class="card">
+        <div class="icon">☕</div>
+        <h3>The Espresso Saucer</h3>
+        <p>"Compound interest waits for no one." A bitter finish.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <h2>Outfit your restaurant. Unsettle your guests.</h2>
+    <p>Now accepting wholesale inquiries from establishments brave enough.</p>
+    <a class="btn" href="mailto:plates@pimco.example?subject=I%20want%20anxious%20diners">Request a Quote(™)</a>
+  </section>
+
+  <footer>
+    <div class="disclaimer">
+      PIMCO Plates is a parody. Not affiliated with, endorsed by, or representative of Pacific Investment Management Company LLC. No real plates were harmed, and no actual financial advice is being given — please consult a human, not a bowl. Past dishwashing performance is not indicative of future results.
+    </div>
+  </footer>
+
+  <script>
+    var quotes = [
+      "Is your money safe?",
+      "Are you retirement ready?",
+      "Diversified, or just hungry?",
+      "Who manages your 401(k)?",
+      "Inflation ate better than you did.",
+      "Compound interest waits for no one.",
+      "Bonds. Not just for dessert.",
+      "Did you tip your future self?"
+    ];
+    var i = 0;
+    var el = document.getElementById("quote");
+    setInterval(function () {
+      el.style.opacity = 0;
+      setTimeout(function () {
+        i = (i + 1) % quotes.length;
+        el.textContent = quotes[i];
+        el.style.opacity = 1;
+      }, 500);
+    }, 3200);
+  </script>
+</body>
+</html>
