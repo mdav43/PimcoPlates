@@ -13,29 +13,32 @@
       --ink: #11253b;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
       font-family: Georgia, "Times New Roman", serif;
       background: var(--cream);
       color: var(--ink);
       line-height: 1.6;
       text-align: center;
+      overflow-x: hidden;
     }
     .bar {
       background: var(--navy);
       color: var(--cream);
-      font-size: 0.8rem;
+      font-size: clamp(0.65rem, 2.6vw, 0.8rem);
       letter-spacing: 0.18em;
       text-transform: uppercase;
       padding: 0.6rem 1rem;
     }
     header {
-      padding: 4rem 1.5rem 2rem;
+      padding: clamp(2.5rem, 9vw, 4rem) 1.25rem 2rem;
     }
     .logo {
-      font-size: 2.6rem;
-      letter-spacing: 0.35em;
+      font-size: clamp(1.6rem, 8vw, 2.6rem);
+      letter-spacing: clamp(0.12em, 1.2vw, 0.35em);
       color: var(--navy);
       font-weight: bold;
+      line-height: 1.2;
     }
     .logo span { color: var(--gold); }
     .tag {
@@ -50,19 +53,17 @@
       padding: 1rem 1.5rem 3rem;
     }
     .hero h1 {
-      font-size: 2rem;
+      font-size: clamp(1.5rem, 6vw, 2rem);
       color: var(--navy);
       margin-bottom: 1rem;
     }
-    .hero p { font-size: 1.15rem; color: #3a4a59; }
+    .hero p { font-size: clamp(1rem, 4vw, 1.15rem); color: #3a4a59; }
 
     /* The plate */
     .plate-stage { padding: 1rem 1.5rem 3rem; }
     .plate {
-      width: 320px;
-      height: 320px;
-      max-width: 80vw;
-      max-height: 80vw;
+      width: min(320px, 74vw);
+      height: min(320px, 74vw);
       margin: 0 auto;
       border-radius: 50%;
       background: radial-gradient(circle at 50% 45%, #ffffff 0%, #f3ede0 60%, #e7ddc8 100%);
@@ -84,9 +85,9 @@
     }
     .quote {
       font-style: italic;
-      font-size: 1.35rem;
+      font-size: clamp(0.95rem, 4.5vw, 1.35rem);
       color: var(--navy);
-      max-width: 60%;
+      max-width: 62%;
       transition: opacity 0.5s ease;
     }
     .plate-note {
@@ -99,17 +100,17 @@
     .products {
       background: var(--navy);
       color: var(--cream);
-      padding: 3.5rem 1.5rem;
+      padding: clamp(2.5rem, 8vw, 3.5rem) 1.25rem;
     }
     .products h2 {
-      font-size: 1.8rem;
+      font-size: clamp(1.4rem, 5.5vw, 1.8rem);
       margin-bottom: 2rem;
       letter-spacing: 0.05em;
     }
     .grid {
       display: flex;
       flex-wrap: wrap;
-      gap: 1.5rem;
+      gap: 1.25rem;
       justify-content: center;
       max-width: 900px;
       margin: 0 auto;
@@ -118,17 +119,19 @@
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(200, 161, 74, 0.35);
       border-radius: 12px;
-      padding: 2rem 1.5rem;
+      padding: 1.75rem 1.5rem;
       width: 250px;
+      max-width: 100%;
+      flex: 1 1 220px;
     }
     .card .icon { font-size: 2.4rem; }
     .card h3 { color: var(--gold); margin: 0.75rem 0 0.4rem; letter-spacing: 0.04em; }
     .card p { font-size: 0.95rem; color: #cbd5e0; }
 
     .cta {
-      padding: 3.5rem 1.5rem 4rem;
+      padding: clamp(2.5rem, 8vw, 3.5rem) 1.25rem 4rem;
     }
-    .cta h2 { font-size: 1.7rem; color: var(--navy); margin-bottom: 0.5rem; }
+    .cta h2 { font-size: clamp(1.3rem, 5vw, 1.7rem); color: var(--navy); margin-bottom: 0.5rem; }
     .cta p { color: #5b6b7a; margin-bottom: 1.5rem; }
     .btn {
       display: inline-block;
@@ -150,9 +153,14 @@
       color: #8a98a6;
       font-size: 0.72rem;
       line-height: 1.7;
-      padding: 2.5rem 1.5rem;
+      padding: 2.5rem 1.25rem;
     }
     footer .disclaimer { max-width: 640px; margin: 0 auto; }
+
+    @media (max-width: 480px) {
+      .quote { max-width: 72%; }
+      .card { flex-basis: 100%; }
+    }
   </style>
 </head>
 <body>
