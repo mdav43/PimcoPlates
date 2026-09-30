@@ -1,0 +1,25 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 10px;
+  padding: 1.25rem;
+  background: var(--ifm-background-surface-color);
+}
+.card h3 { margin: 0.5rem 0; }
+.card p { flex: 1; color: var(--ifm-color-emphasis-700); font-size: 0.92rem; }
+.head { display: flex; justify-content: space-between; align-items: center; }
+.domain { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ifm-color-emphasis-600); }
+.status { font-size: 0.7rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 999px; }
+.ga { background: rgba(46, 125, 91, 0.15); color: #2e7d5b; }
+.beta { background: rgba(178, 106, 0, 0.15); color: #b26a00; }
+.meta { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.75rem; font-size: 0.82rem; margin: 0 0 1rem; }
+.meta dt { color: var(--ifm-color-emphasis-600); }
+.meta dd { margin: 0; }
+.actions { display: flex; gap: 0.5rem; }

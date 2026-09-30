@@ -1,0 +1,42 @@
+---
+title: Platform overview
+slug: /intro
+---
+
+# Meridian Developer Portal
+
+This portal demonstrates **Docusaurus as the backbone for bank-wide documentation**: every team owns a folder, every API is described in OpenAPI, and the portal stitches them into one searchable, cross-linked site deployed to Cloudflare.
+
+## How it fits together
+
+```mermaid
+flowchart TB
+  subgraph Repo["Portal repository"]
+    REG[projects/projects.json<br/>registry]
+    subgraph P1["projects/&lt;id&gt;/"]
+      MD[docs/*.mdx<br/>guides]
+      OAS[openapi.yaml]
+    end
+    SH[shared/openapi/common.yaml]
+  end
+  OAS -- $ref --> SH
+  REG --> CFG[docusaurus.config.ts]
+  OAS --> BUNDLE[bundle-specs<br/>Redocly] --> GEN[gen-api-docs<br/>OpenAPI plugin]
+  GEN --> SITE[Static site]
+  MD --> SITE
+  OAS --> CAT[api-catalog plugin] --> SITE
+  SITE --> CF[Cloudflare Workers<br/>static assets]
+```
+
+| Capability | How it is delivered |
+|---|---|
+| Multi-project | One `plugin-content-docs` instance per project (`/payments`, `/accounts`, …) with its own sidebar and versioning |
+| OpenAPI reference | `docusaurus-plugin-openapi-docs` renders each spec with an interactive *try it* panel |
+| Shared contracts | Common schemas (`Money`, `AccountRef`, `PartyRef`, `Problem`) live in one file and are `$ref`'d by every spec |
+| Cross-project links | `<ApiRef>` / `<SchemaRef>` resolve against the catalog at build time and fail the build if broken |
+| Discovery | [API Catalog](/catalog), offline full-text search, service map |
+| Hosting | Static build served by Cloudflare (see [Deploy to Cloudflare](./deploy-cloudflare.md)) |
+
+## Projects
+
+<ProjectCards />

@@ -1,0 +1,30 @@
+---
+title: Service map
+---
+
+# Service map
+
+Dependencies declared in `projects/projects.json` (`dependsOn`) and documented in each project's *Cross-project integrations* page.
+
+```mermaid
+flowchart LR
+  PAY[Payments Hub] --> ACC[Accounts & Balances]
+  PAY --> FX[FX & Treasury]
+  PAY --> KYC[Customer Onboarding]
+  CARDS[Card Services] --> ACC
+  CARDS --> FX
+  FX --> ACC
+  click PAY "/payments/intro"
+  click ACC "/accounts/intro"
+  click CARDS "/cards/intro"
+  click FX "/fx/intro"
+  click KYC "/kyc/intro"
+```
+
+## Canonical identifiers
+
+| Identifier | Owner | Consumers |
+|---|---|---|
+| `AccountRef` | <ApiRef project="accounts" op="getAccount" /> | Payments, Cards, FX |
+| `PartyRef` | <ApiRef project="kyc" op="getParty" /> | Accounts, Payments, Cards |
+| `fxQuoteId` | <ApiRef project="fx" op="createQuote" /> | Payments |

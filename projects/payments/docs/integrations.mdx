@@ -1,0 +1,21 @@
+---
+sidebar_position: 4
+title: Cross-project integrations
+---
+
+# Cross-project integrations
+
+Links below are **resolved from the other projects' OpenAPI specs at build time** — if an operation is renamed or removed, the portal build fails instead of shipping a broken link.
+
+| Operation | Why Payments Hub uses it |
+|---|---|
+| <ApiRef project="accounts" op="getBalances" /> | Funds check before release. |
+| <ApiRef project="accounts" op="listTransactions" /> | Reconcile the booked debit via `sourceReference = paymentId`. |
+| <ApiRef project="fx" op="createQuote" /> | Obtain `fxQuoteId` for cross-currency payments. |
+| <ApiRef project="kyc" op="screenName" /> | Sanctions screening of every cross-border creditor. |
+
+## Shared schemas
+
+This API reuses the bank-wide components from `shared/openapi/common.yaml`:
+
+<SchemaRef project="payments" name="Money" /> <SchemaRef project="payments" name="AccountRef" /> <SchemaRef project="payments" name="PartyRef" /> <SchemaRef project="payments" name="Problem" />

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "payments",
+    "name": "Payments Hub",
+    "domain": "Transaction Banking",
+    "owner": "Payments Platform Team",
+    "status": "GA",
+    "version": "2.4.0",
+    "summary": "Initiate, track and reconcile domestic and cross-border payments (ACH, Fedwire, SEPA, SWIFT).",
+    "dependsOn": ["accounts", "fx", "kyc"]
+  },
+  {
+    "id": "accounts",
+    "name": "Accounts & Balances",
+    "domain": "Core Banking",
+    "owner": "Core Ledger Team",
+    "status": "GA",
+    "version": "3.1.0",
+    "summary": "Real-time account details, balances and transaction history across deposit products.",
+    "dependsOn": []
+  },
+  {
+    "id": "cards",
+    "name": "Card Services",
+    "domain": "Consumer Banking",
+    "owner": "Cards Engineering",
+    "status": "GA",
+    "version": "1.8.0",
+    "summary": "Issue, activate, freeze and manage debit and credit cards, limits and authorisations.",
+    "dependsOn": ["accounts", "fx"]
+  },
+  {
+    "id": "fx",
+    "name": "FX & Treasury",
+    "domain": "Markets",
+    "owner": "Treasury Technology",
+    "status": "Beta",
+    "version": "1.2.0-beta",
+    "summary": "Indicative and executable FX quotes, trade booking and settlement instructions.",
+    "dependsOn": ["accounts"]
+  },
+  {
+    "id": "kyc",
+    "name": "Customer Onboarding (KYC)",
+    "domain": "Risk & Compliance",
+    "owner": "Financial Crime Engineering",
+    "status": "GA",
+    "version": "2.0.0",
+    "summary": "Customer identity verification, sanctions screening and risk scoring for onboarding.",
+    "dependsOn": []
+  }
+]

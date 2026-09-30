@@ -1,0 +1,10 @@
+{
+  "extends": "@docusaurus/tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "types": ["docusaurus-plugin-openapi-docs", "docusaurus-theme-openapi-docs", "@docusaurus/module-type-aliases", "@docusaurus/theme-classic"]
+  },
+  "exclude": [".docusaurus", "build", "node_modules", "projects/*/docs/api"]
+}

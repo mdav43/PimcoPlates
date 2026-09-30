@@ -1,0 +1,20 @@
+---
+sidebar_position: 4
+title: Cross-project integrations
+---
+
+# Cross-project integrations
+
+Links below are **resolved from the other projects' OpenAPI specs at build time** — if an operation is renamed or removed, the portal build fails instead of shipping a broken link.
+
+| Operation | Why Card Services uses it |
+|---|---|
+| <ApiRef project="accounts" op="getBalances" /> | Real-time funds check at authorisation. |
+| <ApiRef project="fx" op="getRates" /> | Reference rate for foreign-currency `billingAmount`. |
+| <ApiRef project="kyc" op="getParty" /> | Cardholder must be `VERIFIED` before issuance. |
+
+## Shared schemas
+
+This API reuses the bank-wide components from `shared/openapi/common.yaml`:
+
+<SchemaRef project="cards" name="Money" /> <SchemaRef project="cards" name="AccountRef" /> <SchemaRef project="cards" name="PartyRef" /> <SchemaRef project="cards" name="Problem" />

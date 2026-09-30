@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: Accounts & Balances API
+  version: 3.1.0
+  description: |
+    System of record for deposit accounts. Other Meridian services reference accounts
+    using the shared `AccountRef` schema.
+  contact: { name: Core Ledger Team, email: core-ledger@meridian.example }
+servers:
+  - url: https://api.meridian.example/accounts/v3
+    description: Production
+  - url: https://sandbox.api.meridian.example/accounts/v3
+    description: Sandbox
+security:
+  - OAuth2: [accounts:read]
+tags:
+  - name: Accounts
+    description: Account details and lifecycle.
+  - name: Balances
+    description: Real-time and ledger balances.
+  - name: Transactions
+    description: Posted and pending transactions.
+paths:
+  /accounts:
+    get:
+      tags: [Accounts]
+      operationId: listAccounts
+      summary: List accounts
+      description: Returns accounts the caller is entitled to see, optionally filtered by party.
+      parameters:
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/CorrelationId'
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/PageCursor'
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/PageLimit'
+        - name: partyId
+          in: query
+          description: Filter by owning party (see KYC service).
+          schema: { type: string }
+      responses:
+        '200':
+          description: Page of accounts.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Account' } }
+                  page: { $ref: '../../shared/openapi/common.yaml#/components/schemas/PageInfo' }
+        '401': { $ref: '../../shared/openapi/common.yaml#/components/responses/Unauthorized' }
+  /accounts/{accountId}:
+    get:
+      tags: [Accounts]
+      operationId: getAccount
+      summary: Get account
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          description: Account details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Account' }
+        '404': { $ref: '../../shared/openapi/common.yaml#/components/responses/NotFound' }
+  /accounts/{accountId}/balances:
+    get:
+      tags: [Balances]
+      operationId: getBalances
+      summary: Get balances
+      description: Returns available, ledger and held balances. Used by Payments and Cards for funds checks.
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          description: Balances.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Balances' }
+        '404': { $ref: '../../shared/openapi/common.yaml#/components/responses/NotFound' }
+  /accounts/{accountId}/transactions:
+    get:
+      tags: [Transactions]
+      operationId: listTransactions
+      summary: List transactions
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/PageCursor'
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/PageLimit'
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Page of transactions.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Transaction' } }
+                  page: { $ref: '../../shared/openapi/common.yaml#/components/schemas/PageInfo' }
+components:
+  securitySchemes:
+    OAuth2: { $ref: '../../shared/openapi/common.yaml#/components/securitySchemes/OAuth2' }
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      required: true
+      schema: { type: string, example: acc_9f2c1e7b }
+  schemas:
+    Account:
+      allOf:
+        - $ref: '../../shared/openapi/common.yaml#/components/schemas/AccountRef'
+        - type: object
+          properties:
+            name: { type: string, example: Operating Account }
+            productType: { type: string, enum: [CURRENT, SAVINGS, TERM_DEPOSIT, NOSTRO] }
+            currency: { $ref: '../../shared/openapi/common.yaml#/components/schemas/CurrencyCode' }
+            status: { type: string, enum: [OPEN, DORMANT, BLOCKED, CLOSED] }
+            owner: { $ref: '../../shared/openapi/common.yaml#/components/schemas/PartyRef' }
+            openedOn: { type: string, format: date }
+    Balances:
+      type: object
+      properties:
+        accountId: { type: string }
+        available: { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' }
+        ledger: { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' }
+        held: { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' }
+        asOf: { type: string, format: date-time }
+    Transaction:
+      type: object
+      properties:
+        transactionId: { type: string, example: txn_77aa01 }
+        amount: { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' }
+        direction: { type: string, enum: [CREDIT, DEBIT] }
+        status: { type: string, enum: [PENDING, POSTED, REVERSED] }
+        description: { type: string }
+        sourceSystem: { type: string, enum: [PAYMENTS, CARDS, FX, BRANCH], description: Originating Meridian service. }
+        sourceReference: { type: string, description: 'e.g. paymentId or authorisationId' }
+        bookedAt: { type: string, format: date-time }

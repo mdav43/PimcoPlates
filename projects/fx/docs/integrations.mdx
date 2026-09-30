@@ -1,0 +1,20 @@
+---
+sidebar_position: 4
+title: Cross-project integrations
+---
+
+# Cross-project integrations
+
+Links below are **resolved from the other projects' OpenAPI specs at build time** — if an operation is renamed or removed, the portal build fails instead of shipping a broken link.
+
+| Operation | Why FX & Treasury uses it |
+|---|---|
+| <ApiRef project="accounts" op="getAccount" /> | Validate sell/buy settlement accounts. |
+| <ApiRef project="payments" op="createPayment" /> | Consumes `quoteId` as `fxQuoteId`. |
+| <ApiRef project="cards" op="listAuthorisations" /> | Uses `/rates` for card FX conversion. |
+
+## Shared schemas
+
+This API reuses the bank-wide components from `shared/openapi/common.yaml`:
+
+<SchemaRef project="fx" name="Money" /> <SchemaRef project="fx" name="AccountRef" /> <SchemaRef project="fx" name="Problem" />

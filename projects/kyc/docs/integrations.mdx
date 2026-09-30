@@ -1,0 +1,20 @@
+---
+sidebar_position: 4
+title: Cross-project integrations
+---
+
+# Cross-project integrations
+
+Links below are **resolved from the other projects' OpenAPI specs at build time** — if an operation is renamed or removed, the portal build fails instead of shipping a broken link.
+
+| Operation | Why Customer Onboarding (KYC) uses it |
+|---|---|
+| <ApiRef project="accounts" op="listAccounts" /> | Find accounts for a party via `partyId` filter. |
+| <ApiRef project="payments" op="createPayment" /> | Payments Hub calls `/screening` for every cross-border creditor. |
+| <ApiRef project="cards" op="issueCard" /> | Card issuance requires a `VERIFIED` cardholder. |
+
+## Shared schemas
+
+This API reuses the bank-wide components from `shared/openapi/common.yaml`:
+
+<SchemaRef project="kyc" name="PartyRef" /> <SchemaRef project="kyc" name="Problem" />

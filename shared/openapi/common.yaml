@@ -1,0 +1,111 @@
+# Shared OpenAPI components used by every Meridian API.
+# Referenced from project specs via $ref: '../../shared/openapi/common.yaml#/components/...'
+openapi: 3.0.3
+info:
+  title: Meridian Common Components
+  version: 1.0.0
+paths: {}
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: Meridian Identity Platform (client-credentials for systems, auth-code for channels).
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.meridian.example/oauth2/token
+          scopes:
+            accounts:read: Read account data
+            payments:write: Initiate payments
+            payments:read: Read payments
+            cards:manage: Manage cards
+            fx:trade: Request quotes and book trades
+            kyc:verify: Submit and read verifications
+    mTLS:
+      type: http
+      scheme: bearer
+      description: Mutual TLS is enforced at the API gateway for all server-to-server calls.
+  parameters:
+    CorrelationId:
+      name: X-Correlation-Id
+      in: header
+      required: false
+      description: End-to-end trace identifier propagated across all Meridian services.
+      schema: { type: string, format: uuid }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique key per logical request; replays within 24h return the original response.
+      schema: { type: string, maxLength: 64 }
+    PageCursor:
+      name: cursor
+      in: query
+      required: false
+      schema: { type: string }
+    PageLimit:
+      name: limit
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+  schemas:
+    Money:
+      type: object
+      description: Monetary amount in minor-unit-safe decimal string form.
+      required: [amount, currency]
+      properties:
+        amount: { type: string, pattern: '^-?\d+(\.\d{1,4})?$', example: '1250.00' }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+    CurrencyCode:
+      type: string
+      description: ISO 4217 currency code.
+      pattern: '^[A-Z]{3}$'
+      example: USD
+    AccountRef:
+      type: object
+      description: Canonical reference to an account owned by the Accounts & Balances service.
+      required: [accountId]
+      properties:
+        accountId: { type: string, example: acc_9f2c1e7b }
+        iban: { type: string, example: GB33BUKB20201555555555 }
+    PartyRef:
+      type: object
+      description: Canonical reference to a verified customer owned by the KYC service.
+      required: [partyId]
+      properties:
+        partyId: { type: string, example: pty_51c0a9 }
+    PageInfo:
+      type: object
+      properties:
+        nextCursor: { type: string, nullable: true }
+        hasMore: { type: boolean }
+    Problem:
+      type: object
+      description: RFC 9457 problem details.
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri, example: https://errors.meridian.example/insufficient-funds }
+        title: { type: string, example: Insufficient funds }
+        status: { type: integer, example: 422 }
+        detail: { type: string }
+        correlationId: { type: string, format: uuid }
+  responses:
+    BadRequest:
+      description: Request failed validation.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Unauthorized:
+      description: Missing or invalid credentials.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: Resource not found.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Unprocessable:
+      description: Business rule violation.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }

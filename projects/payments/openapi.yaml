@@ -1,0 +1,164 @@
+openapi: 3.0.3
+info:
+  title: Payments Hub API
+  version: 2.4.0
+  description: |
+    Single entry point for initiating and tracking payments across ACH, Fedwire, SEPA and SWIFT rails.
+    Debtor/creditor accounts are `AccountRef`s from **Accounts & Balances**; cross-currency payments
+    consume a quote from **FX & Treasury**; parties must be verified by **KYC**.
+  contact: { name: Payments Platform Team, email: payments-platform@meridian.example }
+servers:
+  - url: https://api.meridian.example/payments/v2
+    description: Production
+  - url: https://sandbox.api.meridian.example/payments/v2
+    description: Sandbox
+security:
+  - OAuth2: [payments:write]
+tags:
+  - name: Payments
+    description: Payment initiation and status.
+  - name: Batches
+    description: Bulk payment files.
+paths:
+  /payments:
+    post:
+      tags: [Payments]
+      operationId: createPayment
+      summary: Initiate a payment
+      parameters:
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/IdempotencyKey'
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentRequest' }
+      responses:
+        '201':
+          description: Payment accepted for processing.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Payment' }
+        '400': { $ref: '../../shared/openapi/common.yaml#/components/responses/BadRequest' }
+        '422': { $ref: '../../shared/openapi/common.yaml#/components/responses/Unprocessable' }
+    get:
+      tags: [Payments]
+      operationId: listPayments
+      summary: List payments
+      security: [ { OAuth2: [payments:read] } ]
+      parameters:
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/PageCursor'
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/PageLimit'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/PaymentStatus' }
+      responses:
+        '200':
+          description: Page of payments.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Payment' } }
+                  page: { $ref: '../../shared/openapi/common.yaml#/components/schemas/PageInfo' }
+  /payments/{paymentId}:
+    get:
+      tags: [Payments]
+      operationId: getPayment
+      summary: Get payment status
+      security: [ { OAuth2: [payments:read] } ]
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Payment.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Payment' }
+        '404': { $ref: '../../shared/openapi/common.yaml#/components/responses/NotFound' }
+  /payments/{paymentId}/cancel:
+    post:
+      tags: [Payments]
+      operationId: cancelPayment
+      summary: Cancel a payment
+      description: Only possible while status is `PENDING_APPROVAL` or `SCHEDULED`.
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Cancelled.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Payment' }
+        '422': { $ref: '../../shared/openapi/common.yaml#/components/responses/Unprocessable' }
+  /batches:
+    post:
+      tags: [Batches]
+      operationId: submitBatch
+      summary: Submit a payment batch
+      parameters:
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [payments]
+              properties:
+                payments:
+                  type: array
+                  maxItems: 5000
+                  items: { $ref: '#/components/schemas/PaymentRequest' }
+      responses:
+        '202':
+          description: Batch accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  batchId: { type: string }
+                  count: { type: integer }
+components:
+  securitySchemes:
+    OAuth2: { $ref: '../../shared/openapi/common.yaml#/components/securitySchemes/OAuth2' }
+  schemas:
+    PaymentStatus:
+      type: string
+      enum: [RECEIVED, PENDING_APPROVAL, SCHEDULED, SCREENING, SENT, SETTLED, REJECTED, CANCELLED]
+    PaymentRequest:
+      type: object
+      required: [debtorAccount, creditor, amount, rail]
+      properties:
+        debtorAccount: { $ref: '../../shared/openapi/common.yaml#/components/schemas/AccountRef' }
+        creditor:
+          type: object
+          properties:
+            name: { type: string }
+            account: { $ref: '../../shared/openapi/common.yaml#/components/schemas/AccountRef' }
+            party: { $ref: '../../shared/openapi/common.yaml#/components/schemas/PartyRef' }
+        amount: { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' }
+        rail: { type: string, enum: [ACH, FEDWIRE, SEPA_CT, SEPA_INST, SWIFT] }
+        fxQuoteId:
+          type: string
+          description: Required when debtor account currency differs from payment currency. Obtain from FX & Treasury `POST /quotes`.
+        executionDate: { type: string, format: date }
+        remittanceInfo: { type: string, maxLength: 140 }
+    Payment:
+      allOf:
+        - $ref: '#/components/schemas/PaymentRequest'
+        - type: object
+          properties:
+            paymentId: { type: string, example: pay_3be81f }
+            status: { $ref: '#/components/schemas/PaymentStatus' }
+            ledgerTransactionId: { type: string, description: Transaction id in Accounts & Balances once booked. }
+            createdAt: { type: string, format: date-time }

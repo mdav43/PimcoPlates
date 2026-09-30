@@ -1,0 +1,13 @@
+.hero {
+  background: linear-gradient(135deg, #072a4d 0%, #0b3d6e 60%, #14528f 100%);
+  color: #fff;
+  padding: 4rem 0 3rem;
+}
+.hero h1 { font-size: clamp(2rem, 5vw, 3rem); color: #fff; }
+.hero p { font-size: 1.15rem; max-width: 46rem; opacity: 0.9; }
+.stats { display: flex; gap: 2.5rem; flex-wrap: wrap; margin: 2rem 0; }
+.stats div { display: flex; flex-direction: column; }
+.stats strong { font-size: 2rem; color: #e8b04a; line-height: 1; }
+.stats span { font-size: 0.85rem; opacity: 0.8; }
+.cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+.cta :global(.button--outline) { color: #fff; border-color: rgba(255, 255, 255, 0.6); }

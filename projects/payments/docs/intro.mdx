@@ -1,0 +1,52 @@
+---
+sidebar_position: 1
+title: Overview
+slug: /intro
+---
+
+# Payments Hub
+
+:::info Project facts
+**Domain:** Transaction Banking · **Owner:** Payments Platform Team · **Status:** GA · **Version:** v2.4.0
+:::
+
+Payments Hub is the single entry point for moving money at Meridian. Channels (online banking, treasury portals, host-to-host) call one API; the hub validates, screens, routes and books the payment on the correct rail.
+
+**Rails supported:** ACH, Fedwire, SEPA Credit Transfer, SEPA Instant, SWIFT gpi.
+
+## At a glance
+
+| | |
+|---|---|
+| **Depends on** | [Accounts & Balances](/accounts/intro), [FX & Treasury](/fx/intro), [Customer Onboarding (KYC)](/kyc/intro) |
+| **Consumed by** | None |
+| **Spec** | [Download OpenAPI (bundled)](pathname:///openapi/payments.yaml) |
+| **Reference** | [API Reference](/payments/api) |
+
+## Operations
+
+Rendered live from `projects/payments/openapi.yaml`:
+
+<OperationTable project="payments" />
+
+## Key flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant P as Payments Hub
+    participant K as KYC
+    participant F as FX & Treasury
+    participant A as Accounts & Balances
+    C->>P: POST /payments (Idempotency-Key)
+    P->>K: POST /screening (creditor)
+    K-->>P: CLEAR
+    alt cross-currency
+      P->>F: validate fxQuoteId
+    end
+    P->>A: GET /accounts/{id}/balances
+    A-->>P: available funds
+    P-->>C: 201 RECEIVED
+    P->>A: book debit (ledgerTransactionId)
+```

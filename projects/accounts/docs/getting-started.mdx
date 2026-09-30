@@ -1,0 +1,24 @@
+---
+sidebar_position: 2
+title: Getting started
+---
+
+# Getting started with Accounts & Balances
+
+1. **Request access** — raise an *API Access* request for scope(s) listed in the [API Reference](/accounts/api). Sandbox access is auto-approved.
+2. **Get a token** — all Meridian APIs share one OAuth2 client-credentials flow (see [Platform → API Standards](/platform/api-standards#authentication)).
+3. **Call the sandbox**:
+
+```bash
+TOKEN=$(curl -s -X POST https://auth.meridian.example/oauth2/token \
+  -d grant_type=client_credentials -d client_id=$CLIENT_ID -d client_secret=$CLIENT_SECRET | jq -r .access_token)
+
+curl https://sandbox.api.meridian.example/accounts/v3/accounts/acc_9f2c1e7b/balances \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+4. **Try it in the browser** — every operation page in the API Reference has a *Send API Request* panel pointed at the sandbox.
+
+:::tip Idempotency
+Every write requires an `Idempotency-Key` header (shared parameter, see <SchemaRef project="accounts" name="Problem" /> for error shape).
+:::

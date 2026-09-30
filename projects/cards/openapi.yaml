@@ -1,0 +1,150 @@
+openapi: 3.0.3
+info:
+  title: Card Services API
+  version: 1.8.0
+  description: |
+    Card lifecycle and controls. Cards are linked to an `AccountRef` (Accounts & Balances);
+    foreign-currency authorisations are priced using FX & Treasury reference rates.
+  contact: { name: Cards Engineering, email: cards-eng@meridian.example }
+servers:
+  - url: https://api.meridian.example/cards/v1
+    description: Production
+  - url: https://sandbox.api.meridian.example/cards/v1
+    description: Sandbox
+security:
+  - OAuth2: [cards:manage]
+tags:
+  - name: Cards
+  - name: Controls
+  - name: Authorisations
+paths:
+  /cards:
+    post:
+      tags: [Cards]
+      operationId: issueCard
+      summary: Issue a card
+      parameters:
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [account, cardholder, type]
+              properties:
+                account: { $ref: '../../shared/openapi/common.yaml#/components/schemas/AccountRef' }
+                cardholder: { $ref: '../../shared/openapi/common.yaml#/components/schemas/PartyRef' }
+                type: { type: string, enum: [DEBIT, CREDIT, VIRTUAL] }
+                network: { type: string, enum: [VISA, MASTERCARD] }
+      responses:
+        '201':
+          description: Card issued.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Card' }
+        '422': { $ref: '../../shared/openapi/common.yaml#/components/responses/Unprocessable' }
+  /cards/{cardId}:
+    get:
+      tags: [Cards]
+      operationId: getCard
+      summary: Get card
+      parameters:
+        - $ref: '#/components/parameters/CardId'
+      responses:
+        '200':
+          description: Card.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Card' }
+        '404': { $ref: '../../shared/openapi/common.yaml#/components/responses/NotFound' }
+  /cards/{cardId}/freeze:
+    post:
+      tags: [Controls]
+      operationId: freezeCard
+      summary: Freeze card
+      parameters:
+        - $ref: '#/components/parameters/CardId'
+      responses:
+        '200':
+          description: Card frozen.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Card' }
+  /cards/{cardId}/limits:
+    put:
+      tags: [Controls]
+      operationId: setLimits
+      summary: Set spending limits
+      parameters:
+        - $ref: '#/components/parameters/CardId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Limits' }
+      responses:
+        '200':
+          description: Limits updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Limits' }
+  /cards/{cardId}/authorisations:
+    get:
+      tags: [Authorisations]
+      operationId: listAuthorisations
+      summary: List authorisations
+      parameters:
+        - $ref: '#/components/parameters/CardId'
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/PageCursor'
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/PageLimit'
+      responses:
+        '200':
+          description: Authorisations.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Authorisation' } }
+                  page: { $ref: '../../shared/openapi/common.yaml#/components/schemas/PageInfo' }
+components:
+  securitySchemes:
+    OAuth2: { $ref: '../../shared/openapi/common.yaml#/components/securitySchemes/OAuth2' }
+  parameters:
+    CardId:
+      name: cardId
+      in: path
+      required: true
+      schema: { type: string, example: crd_0c44d2 }
+  schemas:
+    Card:
+      type: object
+      properties:
+        cardId: { type: string }
+        maskedPan: { type: string, example: '4111 **** **** 1111' }
+        type: { type: string, enum: [DEBIT, CREDIT, VIRTUAL] }
+        status: { type: string, enum: [INACTIVE, ACTIVE, FROZEN, CLOSED] }
+        account: { $ref: '../../shared/openapi/common.yaml#/components/schemas/AccountRef' }
+        cardholder: { $ref: '../../shared/openapi/common.yaml#/components/schemas/PartyRef' }
+        expiry: { type: string, example: '09/29' }
+    Limits:
+      type: object
+      properties:
+        dailySpend: { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' }
+        atmDaily: { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' }
+        ecommerceEnabled: { type: boolean }
+        blockedMccs: { type: array, items: { type: string } }
+    Authorisation:
+      type: object
+      properties:
+        authorisationId: { type: string }
+        merchant: { type: string }
+        mcc: { type: string }
+        amount: { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' }
+        billingAmount:
+          allOf: [ { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' } ]
+          description: Amount in account currency, converted via FX & Treasury reference rate.
+        fxRate: { type: string, example: '1.0842' }
+        decision: { type: string, enum: [APPROVED, DECLINED] }
+        declineReason: { type: string, nullable: true }

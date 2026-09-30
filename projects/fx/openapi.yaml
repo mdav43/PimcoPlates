@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: FX & Treasury API
+  version: 1.2.0-beta
+  description: |
+    Indicative rates, executable quotes and trade booking. Quotes are consumed by
+    **Payments Hub** (`fxQuoteId`) and reference rates by **Card Services**.
+    Settlement debits/credits are booked in **Accounts & Balances**.
+  contact: { name: Treasury Technology, email: treasury-tech@meridian.example }
+servers:
+  - url: https://api.meridian.example/fx/v1
+    description: Production
+  - url: https://sandbox.api.meridian.example/fx/v1
+    description: Sandbox
+security:
+  - OAuth2: [fx:trade]
+tags:
+  - name: Rates
+  - name: Quotes
+  - name: Trades
+paths:
+  /rates:
+    get:
+      tags: [Rates]
+      operationId: getRates
+      summary: Indicative rates
+      parameters:
+        - name: base
+          in: query
+          required: true
+          schema: { $ref: '../../shared/openapi/common.yaml#/components/schemas/CurrencyCode' }
+        - name: symbols
+          in: query
+          description: Comma separated currency codes.
+          schema: { type: string, example: 'EUR,GBP,JPY' }
+      responses:
+        '200':
+          description: Rates.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  base: { $ref: '../../shared/openapi/common.yaml#/components/schemas/CurrencyCode' }
+                  asOf: { type: string, format: date-time }
+                  rates:
+                    type: object
+                    additionalProperties: { type: string }
+                    example: { EUR: '0.9221', GBP: '0.7874' }
+  /quotes:
+    post:
+      tags: [Quotes]
+      operationId: createQuote
+      summary: Request an executable quote
+      description: Quotes are valid for 30 seconds. Pass the `quoteId` to Payments Hub as `fxQuoteId`.
+      parameters:
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sell, buyCurrency]
+              properties:
+                sell: { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' }
+                buyCurrency: { $ref: '../../shared/openapi/common.yaml#/components/schemas/CurrencyCode' }
+      responses:
+        '201':
+          description: Quote.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Quote' }
+  /trades:
+    post:
+      tags: [Trades]
+      operationId: bookTrade
+      summary: Book a trade against a quote
+      parameters:
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quoteId, sellAccount, buyAccount]
+              properties:
+                quoteId: { type: string }
+                sellAccount: { $ref: '../../shared/openapi/common.yaml#/components/schemas/AccountRef' }
+                buyAccount: { $ref: '../../shared/openapi/common.yaml#/components/schemas/AccountRef' }
+      responses:
+        '201':
+          description: Trade booked.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Trade' }
+        '422': { $ref: '../../shared/openapi/common.yaml#/components/responses/Unprocessable' }
+  /trades/{tradeId}:
+    get:
+      tags: [Trades]
+      operationId: getTrade
+      summary: Get trade
+      parameters:
+        - name: tradeId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Trade.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Trade' }
+        '404': { $ref: '../../shared/openapi/common.yaml#/components/responses/NotFound' }
+components:
+  securitySchemes:
+    OAuth2: { $ref: '../../shared/openapi/common.yaml#/components/securitySchemes/OAuth2' }
+  schemas:
+    Quote:
+      type: object
+      properties:
+        quoteId: { type: string, example: fxq_a1b2c3 }
+        sell: { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' }
+        buy: { $ref: '../../shared/openapi/common.yaml#/components/schemas/Money' }
+        rate: { type: string, example: '0.9219' }
+        expiresAt: { type: string, format: date-time }
+    Trade:
+      type: object
+      properties:
+        tradeId: { type: string }
+        quoteId: { type: string }
+        status: { type: string, enum: [BOOKED, SETTLING, SETTLED, FAILED] }
+        sellAccount: { $ref: '../../shared/openapi/common.yaml#/components/schemas/AccountRef' }
+        buyAccount: { $ref: '../../shared/openapi/common.yaml#/components/schemas/AccountRef' }
+        valueDate: { type: string, format: date }

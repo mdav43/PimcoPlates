@@ -1,0 +1,141 @@
+openapi: 3.0.3
+info:
+  title: Customer Onboarding (KYC) API
+  version: 2.0.0
+  description: |
+    Creates and verifies parties. The resulting `PartyRef` is the canonical customer identifier
+    used by Accounts, Payments and Cards.
+  contact: { name: Financial Crime Engineering, email: fincrime-eng@meridian.example }
+servers:
+  - url: https://api.meridian.example/kyc/v2
+    description: Production
+  - url: https://sandbox.api.meridian.example/kyc/v2
+    description: Sandbox
+security:
+  - OAuth2: [kyc:verify]
+tags:
+  - name: Parties
+  - name: Verifications
+  - name: Screening
+paths:
+  /parties:
+    post:
+      tags: [Parties]
+      operationId: createParty
+      summary: Create a party
+      parameters:
+        - $ref: '../../shared/openapi/common.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PartyInput' }
+      responses:
+        '201':
+          description: Party created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Party' }
+        '400': { $ref: '../../shared/openapi/common.yaml#/components/responses/BadRequest' }
+  /parties/{partyId}:
+    get:
+      tags: [Parties]
+      operationId: getParty
+      summary: Get party
+      parameters:
+        - name: partyId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Party.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Party' }
+        '404': { $ref: '../../shared/openapi/common.yaml#/components/responses/NotFound' }
+  /parties/{partyId}/verifications:
+    post:
+      tags: [Verifications]
+      operationId: startVerification
+      summary: Start identity verification
+      parameters:
+        - name: partyId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                level: { type: string, enum: [SIMPLIFIED, STANDARD, ENHANCED] }
+                documents:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type: { type: string, enum: [PASSPORT, DRIVING_LICENCE, UTILITY_BILL, CERT_OF_INCORPORATION] }
+                      fileId: { type: string }
+      responses:
+        '202':
+          description: Verification started.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Verification' }
+  /screening:
+    post:
+      tags: [Screening]
+      operationId: screenName
+      summary: Sanctions & PEP screening
+      description: Called synchronously by Payments Hub for every creditor on cross-border payments.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                country: { type: string, example: GB }
+                dateOfBirth: { type: string, format: date }
+      responses:
+        '200':
+          description: Screening result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  outcome: { type: string, enum: [CLEAR, POTENTIAL_MATCH, CONFIRMED_MATCH] }
+                  lists: { type: array, items: { type: string }, example: [OFAC_SDN, UK_HMT] }
+components:
+  securitySchemes:
+    OAuth2: { $ref: '../../shared/openapi/common.yaml#/components/securitySchemes/OAuth2' }
+  schemas:
+    PartyInput:
+      type: object
+      required: [type, legalName]
+      properties:
+        type: { type: string, enum: [INDIVIDUAL, ORGANISATION] }
+        legalName: { type: string }
+        countryOfResidence: { type: string }
+        dateOfBirth: { type: string, format: date }
+        registrationNumber: { type: string }
+    Party:
+      allOf:
+        - $ref: '../../shared/openapi/common.yaml#/components/schemas/PartyRef'
+        - $ref: '#/components/schemas/PartyInput'
+        - type: object
+          properties:
+            kycStatus: { type: string, enum: [NOT_STARTED, IN_PROGRESS, VERIFIED, REJECTED] }
+            riskRating: { type: string, enum: [LOW, MEDIUM, HIGH] }
+    Verification:
+      type: object
+      properties:
+        verificationId: { type: string }
+        partyId: { type: string }
+        status: { type: string, enum: [PENDING, PASSED, FAILED, MANUAL_REVIEW] }
+        createdAt: { type: string, format: date-time }
