@@ -2,25 +2,31 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import type * as OpenApiPlugin from 'docusaurus-plugin-openapi-docs';
-import projects from './projects/projects.json';
+import fs from 'node:fs';
+import type {CatalogProject} from './plugins/api-catalog';
+
+// Built by `npm run sync` (scripts/sync-apis.mjs) from every discovered OpenAPI spec.
+const REGISTRY = './generated/registry.json';
+if (!fs.existsSync(REGISTRY)) throw new Error('Missing generated/registry.json – run `npm run sync` first.');
+const projects: CatalogProject[] = JSON.parse(fs.readFileSync(REGISTRY, 'utf8'));
 
 /**
- * Every entry in projects/projects.json becomes:
+ * Every discovered API becomes:
  *  - its own docs plugin instance, served at /<id>/
- *  - an OpenAPI spec (projects/<id>/openapi.yaml) rendered to /<id>/api/
- *  - a navbar entry under "Projects"
- * Adding a project = add a folder + a registry entry. No config edits required.
+ *  - generated API reference at /<id>/api (from its bundled OpenAPI spec)
+ *  - a navbar, footer, home page and catalog entry
+ * No config edits are ever needed to add an API.
  */
 
 const projectDocsPlugins = projects.map((p) => [
   '@docusaurus/plugin-content-docs',
   {
     id: p.id,
-    path: `projects/${p.id}/docs`,
+    path: p.docsPath,
     routeBasePath: p.id,
-    sidebarPath: `./projects/${p.id}/sidebars.ts`,
+    sidebarPath: `./generated/sidebars/${p.id}.ts`,
     docItemComponent: '@theme/ApiItem',
-    editUrl: 'https://github.com/mdav43/pimcoplates/tree/demo-bank/',
+    editUrl: p.hasGuides ? 'https://github.com/mdav43/pimcoplates/tree/demo-bank/' : undefined,
     showLastUpdateTime: false,
   },
 ]);
@@ -33,8 +39,8 @@ const projectOpenApiPlugins = projects.map((p) => [
     docsPluginId: p.id,
     config: {
       [p.id]: {
-        specPath: `static/openapi/${p.id}.yaml`, // bundled from projects/<id>/openapi.yaml
-        outputDir: `projects/${p.id}/docs/api`,
+        specPath: `static/openapi/${p.id}.yaml`, // bundled by scripts/sync-apis.mjs
+        outputDir: `${p.docsPath}/api`,
         downloadUrl: `/openapi/${p.id}.yaml`,
         sidebarOptions: {groupPathsBy: 'tag', categoryLinkSource: 'tag'},
         showSchemas: true,
@@ -101,9 +107,9 @@ const config: Config = {
       items: [
         {
           type: 'dropdown',
-          label: 'Projects',
+          label: 'APIs',
           position: 'left',
-          items: projects.map((p) => ({label: p.name, to: `/${p.id}/intro`})),
+          items: [...projects].sort((a, b) => a.name.localeCompare(b.name)).map((p) => ({label: p.name, to: `/${p.id}/intro`})),
         },
         {to: '/catalog', label: 'API Catalog', position: 'left'},
         {type: 'docSidebar', sidebarId: 'platform', label: 'Platform Standards', position: 'left'},
@@ -114,12 +120,11 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Projects',
-          items: projects.map((p) => ({label: p.name, to: `/${p.id}/intro`})),
-        },
-        {
-          title: 'API Reference',
-          items: projects.map((p) => ({label: `${p.name} API`, to: `/${p.id}/api`})),
+          title: 'APIs',
+          items: [
+            {label: `API Catalog (${projects.length} APIs)`, to: '/catalog'},
+            ...projects.filter((p) => p.origin === 'curated').map((p) => ({label: `${p.name} API`, to: `/${p.id}/api`})),
+          ],
         },
         {
           title: 'Platform',
@@ -127,6 +132,7 @@ const config: Config = {
             {label: 'Overview', to: '/platform/intro'},
             {label: 'API Standards', to: '/platform/api-standards'},
             {label: 'Service Map', to: '/platform/service-map'},
+            {label: 'Auto-documenting APIs', to: '/platform/auto-documentation'},
             {label: 'Add a Project', to: '/platform/add-a-project'},
           ],
         },

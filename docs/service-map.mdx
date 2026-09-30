@@ -4,22 +4,11 @@ title: Service map
 
 # Service map
 
-Dependencies declared in `projects/projects.json` (`dependsOn`) and documented in each project's *Cross-project integrations* page.
+Dependencies come from `dependsOn` in `projects/projects.json` or the spec's `info.x-meridian` block.
 
-```mermaid
-flowchart LR
-  PAY[Payments Hub] --> ACC[Accounts & Balances]
-  PAY --> FX[FX & Treasury]
-  PAY --> KYC[Customer Onboarding]
-  CARDS[Card Services] --> ACC
-  CARDS --> FX
-  FX --> ACC
-  click PAY "/payments/intro"
-  click ACC "/accounts/intro"
-  click CARDS "/cards/intro"
-  click FX "/fx/intro"
-  click KYC "/kyc/intro"
-```
+<ServiceMap />
+
+Generated from the API registry on every build. Dashed boxes are auto-documented APIs (no hand-written guides yet).
 
 ## Canonical identifiers
 

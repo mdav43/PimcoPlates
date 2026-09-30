@@ -5,16 +5,16 @@
   "description": "Central multi-project documentation portal (Docusaurus + OpenAPI) deployed to Cloudflare.",
   "scripts": {
     "docusaurus": "docusaurus",
-    "gen-api": "npm run bundle-specs && node scripts/gen-api.mjs",
+    "gen-api": "npm run sync && node scripts/gen-api.mjs",
     "start": "npm run gen-api && docusaurus start",
     "build": "npm run gen-api && docusaurus build",
     "serve": "docusaurus serve",
     "clear": "docusaurus clear",
-    "typecheck": "tsc",
+    "typecheck": "npm run gen-api && tsc",
     "preview": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy",
-    "bundle-specs": "node scripts/bundle-specs.mjs",
-    "clean-api": "node scripts/clean-api.mjs"
+    "clean-api": "node scripts/clean-api.mjs",
+    "sync": "node scripts/sync-apis.mjs"
   },
   "dependencies": {
     "@docusaurus/core": "^3.10.0",

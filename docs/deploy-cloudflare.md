@@ -8,7 +8,7 @@ The site is a static build (`build/`) served by **Cloudflare Workers static asse
 
 ```bash
 npm ci
-npm run build           # bundle specs → generate API docs → docusaurus build
+npm run build           # sync specs → generate API docs → docusaurus build
 npx wrangler login      # once
 npm run deploy          # build + wrangler deploy
 npm run preview         # local Cloudflare runtime at http://localhost:8787
@@ -16,12 +16,15 @@ npm run preview         # local Cloudflare runtime at http://localhost:8787
 
 ## CI/CD
 
-`.github/workflows/deploy.yml` builds on every push/PR and deploys `demo-bank` to Cloudflare. It needs two repository secrets:
+`.github/workflows/deploy.yml` builds on every push/PR, nightly, and on `api-changed` dispatch events, and deploys to Cloudflare. Secrets:
 
 | Secret | Value |
 |---|---|
 | `CLOUDFLARE_API_TOKEN` | API token with *Workers Scripts: Edit* |
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
+| `SPEC_FETCH_TOKEN` | (optional) credential used by `apis/sources.json` to read live specs |
+
+If specs are only reachable inside the bank network, run the job on a self-hosted runner.
 
 ## Alternative: Cloudflare Pages (Git integration)
 

@@ -17,3 +17,4 @@
 .put { background: #b26a00; }
 .patch { background: #7a4fb5; }
 .delete { background: #b3261e; }
+.origin { font-size: 0.75rem; color: var(--ifm-color-emphasis-600); }

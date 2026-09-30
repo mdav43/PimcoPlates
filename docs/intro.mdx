@@ -5,31 +5,34 @@ slug: /intro
 
 # Meridian Developer Portal
 
-This portal demonstrates **Docusaurus as the backbone for bank-wide documentation**: every team owns a folder, every API is described in OpenAPI, and the portal stitches them into one searchable, cross-linked site deployed to Cloudflare.
+This portal demonstrates **Docusaurus as the backbone for bank-wide documentation**: every existing API is **auto-documented from its OpenAPI spec** (pulled from files or live services), teams can layer hand-written guides on top, and the portal stitches it all into one searchable, cross-linked site deployed to Cloudflare. See [Auto-documenting APIs](./auto-documentation.md).
 
 ## How it fits together
 
 ```mermaid
 flowchart TB
   subgraph Repo["Portal repository"]
-    REG[projects/projects.json<br/>registry]
-    subgraph P1["projects/&lt;id&gt;/"]
+    subgraph P1["projects/&lt;id&gt;/ (curated)"]
       MD[docs/*.mdx<br/>guides]
       OAS[openapi.yaml]
     end
+    DROP[apis/*.yaml<br/>drop-in specs]
     SH[shared/openapi/common.yaml]
   end
+  LIVE[Live services<br/>/v3/api-docs] --> SYNC
   OAS -- $ref --> SH
-  REG --> CFG[docusaurus.config.ts]
-  OAS --> BUNDLE[bundle-specs<br/>Redocly] --> GEN[gen-api-docs<br/>OpenAPI plugin]
+  OAS & DROP --> SYNC[sync-apis<br/>fetch · bundle · validate]
+  SYNC --> REG[(registry.json)] --> CFG[docusaurus.config.ts]
+  SYNC --> GEN[gen-api-docs<br/>OpenAPI plugin]
   GEN --> SITE[Static site]
   MD --> SITE
-  OAS --> CAT[api-catalog plugin] --> SITE
+  REG --> CAT[api-catalog plugin] --> SITE
   SITE --> CF[Cloudflare Workers<br/>static assets]
 ```
 
 | Capability | How it is delivered |
 |---|---|
+| Auto-documentation | Any OpenAPI spec — file or live URL — becomes a full API section with no extra files |
 | Multi-project | One `plugin-content-docs` instance per project (`/payments`, `/accounts`, …) with its own sidebar and versioning |
 | OpenAPI reference | `docusaurus-plugin-openapi-docs` renders each spec with an interactive *try it* panel |
 | Shared contracts | Common schemas (`Money`, `AccountRef`, `PartyRef`, `Problem`) live in one file and are `$ref`'d by every spec |
@@ -37,6 +40,6 @@ flowchart TB
 | Discovery | [API Catalog](/catalog), offline full-text search, service map |
 | Hosting | Static build served by Cloudflare (see [Deploy to Cloudflare](./deploy-cloudflare.md)) |
 
-## Projects
+## APIs
 
 <ProjectCards />

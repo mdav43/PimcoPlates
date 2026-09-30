@@ -1,0 +1,13 @@
+[
+  {
+    "id": "mortgages",
+    "url": "https://mortgages.internal.meridian.example/v3/api-docs",
+    "headers": { "Authorization": "Bearer ${SPEC_FETCH_TOKEN}" }
+  },
+  {
+    "id": "branch-locator",
+    "url": "https://raw.githubusercontent.com/meridian/branch-locator/main/openapi.yaml",
+    "headers": { "Authorization": "token ${GITHUB_TOKEN}" },
+    "optional": true
+  }
+]

@@ -1,0 +1,50 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Lending Origination API",
+    "version": "0.9.0",
+    "description": "Loan applications, credit decisioning and disbursement for retail and SME lending.\n\nExported from the service's SpringDoc endpoint (`/v3/api-docs`).",
+    "contact": {"name": "Lending Squad"},
+    "x-meridian": {"domain": "Retail Lending", "status": "Beta", "dependsOn": ["kyc", "accounts"]}
+  },
+  "servers": [{"url": "https://api.meridian.example/lending/v1"}],
+  "tags": [{"name": "Applications"}, {"name": "Decisions"}],
+  "paths": {
+    "/applications": {
+      "post": {
+        "tags": ["Applications"], "operationId": "submitApplication", "summary": "Submit a loan application",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Application"}}}},
+        "responses": {"201": {"description": "Application created.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Application"}}}}}
+      }
+    },
+    "/applications/{applicationId}": {
+      "get": {
+        "tags": ["Applications"], "operationId": "getApplication", "summary": "Get application",
+        "parameters": [{"name": "applicationId", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "Application.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Application"}}}}}
+      }
+    },
+    "/applications/{applicationId}/decision": {
+      "get": {
+        "tags": ["Decisions"], "operationId": "getDecision", "summary": "Get credit decision",
+        "parameters": [{"name": "applicationId", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "Decision.", "content": {"application/json": {"schema": {"type": "object", "properties": {"outcome": {"type": "string", "enum": ["APPROVED", "DECLINED", "REFER"]}, "apr": {"type": "string", "example": "6.9"}}}}}}}
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Application": {
+        "type": "object",
+        "required": ["partyId", "product", "amount"],
+        "properties": {
+          "applicationId": {"type": "string", "readOnly": true},
+          "partyId": {"type": "string"},
+          "product": {"type": "string", "enum": ["PERSONAL_LOAN", "SME_TERM_LOAN", "MORTGAGE"]},
+          "amount": {"type": "string", "example": "25000.00"},
+          "termMonths": {"type": "integer", "example": 60}
+        }
+      }
+    }
+  }
+}

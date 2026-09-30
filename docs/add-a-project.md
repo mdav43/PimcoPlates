@@ -4,7 +4,11 @@ title: Add a project
 
 # Add a project
 
-Onboarding a new team takes three files and no config changes.
+:::tip Only need API docs?
+Drop the spec into `apis/` or add its URL to `apis/sources.json` — see [Auto-documenting APIs](./auto-documentation.md). The steps below are for teams that also want guides.
+:::
+
+Onboarding a curated project takes a registry entry, a spec and a docs folder — no config changes.
 
 1. **Register** it in `projects/projects.json`:
 
@@ -22,12 +26,7 @@ Onboarding a new team takes three files and no config changes.
    ```
 
 2. **Add** `projects/lending/openapi.yaml` (reuse shared components via `$ref`).
-3. **Add** `projects/lending/docs/` with `intro.mdx`, `getting-started.mdx`, `architecture.md`, `integrations.mdx`, `changelog.md`, and a `sidebars.ts`:
-
-   ```ts title="projects/lending/sidebars.ts"
-   import {projectSidebar} from '../../src/sidebars/projectSidebar';
-   export default {main: projectSidebar(__dirname)};
-   ```
+3. **Add** `projects/lending/docs/` with any guides (`intro.mdx` is required; e.g. `getting-started.mdx`, `architecture.md`, `integrations.mdx`). The sidebar is built automatically, ordered by `sidebar_position`.
 
 On the next build the project appears in the navbar, footer, home page, API catalog and search, and its API reference is generated automatically.
 

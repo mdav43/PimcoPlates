@@ -9,7 +9,7 @@ export default function Catalog() {
   const [q, setQ] = useState('');
   const [project, setProject] = useState('all');
   const [method, setMethod] = useState('all');
-  const all = useMemo(() => projects.flatMap((p) => p.operations.map((o) => ({...o, projectName: p.name}))), [projects]);
+  const all = useMemo(() => projects.flatMap((p) => p.operations.map((o) => ({...o, projectName: p.name, origin: p.origin}))), [projects]);
   const rows = all.filter(
     (o) =>
       (project === 'all' || o.project === project) &&
@@ -20,7 +20,7 @@ export default function Catalog() {
     <Layout title="API Catalog" description="Every operation across every Meridian API.">
       <main className="container margin-vert--lg">
         <h1>API Catalog</h1>
-        <p>Every operation from every project's OpenAPI spec, generated at build time. Download a bundled spec:{' '}
+        <p>Every operation from every discovered OpenAPI spec (curated projects, drop-in specs and live services), regenerated on each build. Download a bundled spec:{' '}
           {projects.map((p, i) => (
             <React.Fragment key={p.id}>{i > 0 && ' · '}<a href={`/openapi/${p.id}.yaml`} download>{p.id}.yaml</a></React.Fragment>
           ))}
@@ -28,7 +28,7 @@ export default function Catalog() {
         <div className={styles.filters}>
           <input className={styles.input} placeholder="Filter by path, summary, tag…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Filter operations" />
           <select className={styles.input} value={project} onChange={(e) => setProject(e.target.value)} aria-label="Project">
-            <option value="all">All projects</option>
+            <option value="all">All APIs</option>
             {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
           <select className={styles.input} value={method} onChange={(e) => setMethod(e.target.value)} aria-label="Method">
@@ -39,7 +39,7 @@ export default function Catalog() {
         <p className={styles.count}>{rows.length} of {all.length} operations</p>
         <div className={styles.tableWrap}>
           <table className={styles.table}>
-            <thead><tr><th>Project</th><th>Method</th><th>Path</th><th>Summary</th></tr></thead>
+            <thead><tr><th>API</th><th>Method</th><th>Path</th><th>Summary</th><th>Source</th></tr></thead>
             <tbody>
               {rows.map((o) => (
                 <tr key={o.url}>
@@ -47,6 +47,7 @@ export default function Catalog() {
                   <td><span className={`${styles.m} ${styles[o.method.toLowerCase()]}`}>{o.method}</span></td>
                   <td><code>{o.path}</code></td>
                   <td><Link to={o.url}>{o.summary}</Link></td>
+                  <td><span className={styles.origin}>{o.origin}</span></td>
                 </tr>
               ))}
             </tbody>

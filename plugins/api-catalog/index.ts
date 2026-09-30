@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import {bundle, createConfig} from '@redocly/openapi-core';
 import type {LoadContext, Plugin} from '@docusaurus/types';
 
 export type CatalogOperation = {
@@ -23,57 +22,24 @@ export type CatalogProject = {
   version: string;
   summary: string;
   dependsOn: string[];
+  origin: 'curated' | 'discovered' | 'remote';
+  source: string;
   title: string;
   servers: {url: string; description?: string}[];
   operations: CatalogOperation[];
   schemas: string[];
+  docsPath: string;
+  hasGuides: boolean;
 };
 
-const METHODS = ['get', 'post', 'put', 'patch', 'delete'];
-// Mirrors docusaurus-plugin-openapi-docs doc id generation (kebab-cased operationId).
-const kebab = (s: string) =>
-  s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').replace(/[\s_]+/g, '-').toLowerCase();
-
-/** Reads every project's OpenAPI spec and exposes a cross-project catalog as global data. */
+/** Exposes the API registry built by scripts/sync-apis.mjs as global data for pages/components. */
 export default function apiCatalog(context: LoadContext): Plugin<CatalogProject[]> {
-  const root = context.siteDir;
-  const registry = path.join(root, 'projects/projects.json');
+  const file = path.join(context.siteDir, 'generated/registry.json');
   return {
     name: 'api-catalog',
-    getPathsToWatch: () => [registry, path.join(root, 'projects/*/openapi.yaml')],
+    getPathsToWatch: () => [file],
     async loadContent() {
-      const projects = JSON.parse(fs.readFileSync(registry, 'utf8'));
-      const config = await createConfig({});
-      return Promise.all(projects.map(async (p: any): Promise<CatalogProject> => {
-        // Bundle so shared $refs (Money, AccountRef, …) count as this project's schemas.
-        const {bundle: result} = await bundle({ref: path.join(root, `projects/${p.id}/openapi.yaml`), config});
-        const spec: any = result.parsed;
-        const operations: CatalogOperation[] = [];
-        for (const [route, item] of Object.entries<any>(spec.paths ?? {})) {
-          for (const method of METHODS) {
-            const op = item[method];
-            if (!op?.operationId) continue;
-            const docId = kebab(op.operationId);
-            operations.push({
-              project: p.id,
-              operationId: op.operationId,
-              docId,
-              method: method.toUpperCase(),
-              path: route,
-              summary: op.summary ?? '',
-              tags: op.tags ?? [],
-              url: `/${p.id}/api/${docId}`,
-            });
-          }
-        }
-        return {
-          ...p,
-          title: spec.info.title,
-          servers: spec.servers ?? [],
-          operations,
-          schemas: Object.keys(spec.components?.schemas ?? {}),
-        };
-      }));
+      return JSON.parse(fs.readFileSync(file, 'utf8'));
     },
     async contentLoaded({content, actions}) {
       actions.setGlobalData({projects: content});

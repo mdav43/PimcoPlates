@@ -12,7 +12,10 @@ export default function ProjectCards() {
         <div key={p.id} className={styles.card}>
           <div className={styles.head}>
             <span className={styles.domain}>{p.domain}</span>
-            <span className={`${styles.status} ${p.status === 'GA' ? styles.ga : styles.beta}`}>{p.status}</span>
+            <span>
+              {p.origin !== 'curated' && <span className={`${styles.status} ${styles.auto}`} title={`Auto-documented from ${p.source}`}>AUTO</span>}{' '}
+              <span className={`${styles.status} ${p.status === 'GA' ? styles.ga : styles.beta}`}>{p.status}</span>
+            </span>
           </div>
           <h3><Link to={`/${p.id}/intro`}>{p.name}</Link></h3>
           <p>{p.summary}</p>
@@ -30,7 +33,7 @@ export default function ProjectCards() {
             </dd>
           </dl>
           <div className={styles.actions}>
-            <Link className="button button--primary button--sm" to={`/${p.id}/intro`}>Guides</Link>
+            <Link className="button button--primary button--sm" to={`/${p.id}/intro`}>{p.hasGuides ? 'Guides' : 'Overview'}</Link>
             <Link className="button button--secondary button--sm" to={`/${p.id}/api`}>API Reference</Link>
           </div>
         </div>

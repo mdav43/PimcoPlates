@@ -23,3 +23,4 @@
 .meta dt { color: var(--ifm-color-emphasis-600); }
 .meta dd { margin: 0; }
 .actions { display: flex; gap: 0.5rem; }
+.auto { background: rgba(31, 95, 174, 0.15); color: #1f5fae; }

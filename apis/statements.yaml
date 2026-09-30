@@ -1,0 +1,65 @@
+openapi: 3.0.3
+info:
+  title: Statements & Documents API
+  version: 1.3.0
+  description: |
+    Monthly statements, tax certificates and advice notes for all deposit and card accounts.
+  contact: { name: Digital Documents Team }
+  x-meridian:
+    domain: Core Banking
+    status: GA
+    dependsOn: [accounts]
+servers:
+  - url: https://api.meridian.example/statements/v1
+tags:
+  - name: Statements
+  - name: Documents
+paths:
+  /accounts/{accountId}/statements:
+    get:
+      tags: [Statements]
+      operationId: listStatements
+      summary: List statements
+      parameters:
+        - { name: accountId, in: path, required: true, schema: { type: string } }
+        - { name: year, in: query, schema: { type: integer, example: 2026 } }
+      responses:
+        '200':
+          description: Statements.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Statement' }
+  /statements/{statementId}/pdf:
+    get:
+      tags: [Statements]
+      operationId: downloadStatement
+      summary: Download statement PDF
+      parameters:
+        - { name: statementId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: PDF document.
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+  /documents:
+    get:
+      tags: [Documents]
+      operationId: listDocuments
+      summary: List documents
+      parameters:
+        - { name: type, in: query, schema: { type: string, enum: [TAX_CERTIFICATE, ADVICE, NOTICE] } }
+      responses:
+        '200':
+          description: Documents.
+components:
+  schemas:
+    Statement:
+      type: object
+      properties:
+        statementId: { type: string }
+        accountId: { type: string }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }

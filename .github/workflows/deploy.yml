@@ -5,6 +5,12 @@ on:
     branches: [demo-bank]
   pull_request:
   workflow_dispatch:
+  # Re-pull live API specs nightly (scheduled runs use the default branch's workflow).
+  schedule:
+    - cron: '17 2 * * *'
+  # API pipelines notify the portal after deploying a new spec.
+  repository_dispatch:
+    types: [api-changed]
 
 concurrency:
   group: cloudflare-${{ github.ref }}
@@ -20,8 +26,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run typecheck
-      - run: npm run build
+      - name: Build (sync specs → generate API docs → site)
+        run: npm run build
+        env:
+          # Credentials referenced as ${VAR} in apis/sources.json
+          SPEC_FETCH_TOKEN: ${{ secrets.SPEC_FETCH_TOKEN }}
+      - run: npx tsc
       - uses: actions/upload-artifact@v4
         with:
           name: site
@@ -29,7 +39,7 @@ jobs:
 
   deploy:
     needs: build
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/demo-bank'
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/demo-bank' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     environment: production
     steps:

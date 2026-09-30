@@ -6,6 +6,7 @@ build/
 .dev.vars
 # Generated at build time from projects/*/openapi.yaml
 projects/*/docs/api/
+generated/
 static/openapi/
 .DS_Store
 npm-debug.log*

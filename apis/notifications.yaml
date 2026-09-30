@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: Notifications API
+  version: 4.0.2
+  description: Customer alerts over push, SMS and email. Legacy service — spec generated from code annotations.
+  contact: { name: Engagement Platform }
+servers:
+  - url: https://api.meridian.example/notifications/v4
+paths:
+  /subscriptions:
+    get:
+      operationId: listSubscriptions
+      summary: List alert subscriptions
+      responses:
+        '200': { description: Subscriptions. }
+    post:
+      operationId: createSubscription
+      summary: Subscribe to an alert
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event: { type: string, enum: [LOW_BALANCE, LARGE_PAYMENT, CARD_DECLINED] }
+                channel: { type: string, enum: [PUSH, SMS, EMAIL] }
+      responses:
+        '201': { description: Created. }
+  /subscriptions/{subscriptionId}:
+    delete:
+      operationId: deleteSubscription
+      summary: Unsubscribe
+      parameters:
+        - { name: subscriptionId, in: path, required: true, schema: { type: string } }
+      responses:
+        '204': { description: Deleted. }
