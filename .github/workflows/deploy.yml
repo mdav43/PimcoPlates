@@ -52,4 +52,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Match package.json; the action's default Wrangler 3 ignores wrangler.jsonc assets config.
+          wranglerVersion: '4.144.0'
           command: deploy
